@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="bg-white p-6 rounded shadow">
+  <div class="flex justify-between items-center mb-4">
+    <div>
+      <h3 class="text-lg font-semibold">Order: {{ order.order_id }}</h3>
+      <div class="text-sm text-gray-500">เกม: {{ order.game }} • สร้างเมื่อ: {{ order.created_at }}</div>
+    </div>
+    <div>
+      <a href="/topup" class="px-3 py-1 border rounded text-sm">กลับ</a>
+    </div>
+  </div>
+
+  <div id="chat" class="border rounded h-96 p-4 overflow-auto bg-gray-50">
+    {% for m in messages %}
+      <div class="mb-2">
+        <span class="text-xs text-gray-400">{{ m.created_at[:19].replace('T',' ') }}</span>
+        <div class="mt-1">
+          <span class="font-medium">{{ m.sender }}</span>: <span>{{ m.content }}</span>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="mt-4 flex gap-2">
+    <input id="msg" class="flex-1 p-2 border rounded" placeholder="พิมพ์ข้อความเพื่อส่งถึงแอดมิน..." />
+    <button id="sendBtn" class="px-4 py-2 bg-blue-600 text-white rounded">ส่ง</button>
+  </div>
+</div>
+
+<script src="/static/client.js"></script>
+<script>
+const ORDER_ID = "{{ order.order_id }}";
+initChat(ORDER_ID);
+</script>
+{% endblock %}

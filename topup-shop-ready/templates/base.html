@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{{ shop_name }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-blue-50 text-gray-800">
+  <nav class="bg-white shadow">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <div class="flex items-center gap-4">
+          <a href="/" class="text-xl font-semibold text-blue-600">{{ shop_name }}</a>
+          <a href="/topup" class="text-sm text-gray-600 hover:text-blue-600">เติมเกม</a>
+        </div>
+        <div class="flex items-center gap-3">
+          {% if user %}
+            <div class="text-sm">สวัสดี, <span class="font-medium">{{ user.username }}</span>#{{ user.discriminator }}</div>
+            <a href="/logout" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm">ออก</a>
+          {% else %}
+            <a href="/login" class="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">ล็อกอินด้วย Discord</a>
+          {% endif %}
+          <a href="/admin" class="px-3 py-1 border rounded text-sm">หลังบ้าน</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-6xl mx-auto mt-8 px-4">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="mb-4">
+          {% for m in messages %}
+            <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-2 rounded mb-2">{{ m }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

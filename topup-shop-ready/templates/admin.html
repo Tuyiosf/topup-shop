@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="bg-white p-6 rounded shadow">
+  {% if not logged_in %}
+    <h3 class="text-lg font-semibold mb-3">Admin Login</h3>
+    <form method="post" class="flex gap-2">
+      <input name="password" type="password" placeholder="รหัสผ่าน admin" class="p-2 border rounded flex-1" />
+      <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Login</button>
+    </form>
+  {% else %}
+    <div class="flex gap-6">
+      <div class="w-1/3">
+        <h4 class="font-medium mb-2">Orders</h4>
+        <div class="space-y-2 max-h-[60vh] overflow-auto">
+          {% for o in orders %}
+            <div class="p-3 border rounded flex justify-between items-center">
+              <div>
+                <div class="font-medium">{{ o.order_id }}</div>
+                <div class="text-xs text-gray-500">{{ o.game }} • {{ o.created_at }}</div>
+              </div>
+              <div>
+                <button onclick="openChat('{{ o.order_id }}')" class="px-3 py-1 bg-blue-600 text-white rounded text-sm">เปิดแชท</button>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="flex-1">
+        <h4 class="font-medium mb-2">Chat</h4>
+        <div id="adminChatArea" class="hidden flex flex-col h-[60vh]">
+          <div id="adminMessages" class="flex-1 p-3 border rounded overflow-auto bg-gray-50"></div>
+          <div class="mt-2 flex gap-2">
+            <input id="adminMsg" class="flex-1 p-2 border rounded" placeholder="พิมพ์ข้อความ..." />
+            <button onclick="sendAdmin()" class="px-4 py-2 bg-blue-600 text-white rounded">ส่ง</button>
+          </div>
+        </div>
+        <div id="adminEmpty" class="text-gray-500">เลือก Order ทางซ้ายเพื่อเปิดแชท</div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<script src="/static/client.js"></script>
+<script>
+let currentOrder = null;
+function openChat(orderId){
+  currentOrder = orderId;
+  document.getElementById("adminChatArea").classList.remove("hidden");
+  document.getElementById("adminEmpty").classList.add("hidden");
+  document.getElementById("adminMessages").innerHTML = "";
+  fetch(`/admin/order/${orderId}/messages`).then(r=>r.json()).then(j=>{
+    j.messages.forEach(m => {
+      addAdminLine(m.sender, m.content);
+    });
+    socket.emit("join", { order_id: orderId });
+  });
+}
+
+function addAdminLine(sender, text){
+  const el = document.createElement("div");
+  el.className = "mb-2";
+  el.innerHTML = `<div class="text-xs text-gray-400">${sender}</div><div>${text}</div>`;
+  document.getElementById("adminMessages").appendChild(el);
+  document.getElementById("adminMessages").scrollTop = document.getElementById("adminMessages").scrollHeight;
+}
+
+function sendAdmin(){
+  const content = document.getElementById("adminMsg").value.trim();
+  if(!content || !currentOrder) return;
+  fetch('/admin/send_message', {
+    method:'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({order_id: currentOrder, content})
+  }).then(r=>r.json()).then(j=>{
+    document.getElementById("adminMsg").value = "";
+  });
+}
+</script>
+{% endblock %}

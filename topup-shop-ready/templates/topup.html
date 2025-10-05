@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="bg-white p-6 rounded shadow">
+  <h2 class="text-xl font-semibold mb-4">เลือกเกมที่ต้องการเติม</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    {% for g in games %}
+    <div class="p-4 border rounded flex flex-col">
+      <h3 class="font-medium">{{ g }}</h3>
+      <p class="text-sm text-gray-500">บริการเติมสำหรับ {{ g }}</p>
+      <button onclick="createOrder('{{ g }}')" class="mt-auto px-4 py-2 bg-blue-600 text-white rounded">ติดต่อการซื้อ</button>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+async function createOrder(game){
+  try {
+    const res = await axios.post('/create_order', { game });
+    if (res.data && res.data.order_url) {
+      window.location.href = res.data.order_url;
+    }
+  } catch (err) {
+    if (err.response && err.response.data && err.response.data.login_url) {
+      window.location.href = err.response.data.login_url;
+    } else {
+      alert('เกิดข้อผิดพลาด กรุณาลองใหม่');
+      console.error(err);
+    }
+  }
+}
+</script>
+{% endblock %}
